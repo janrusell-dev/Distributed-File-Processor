@@ -6,6 +6,8 @@ import (
 	"github.com/google/uuid"
 	db "github.com/janrusell-dev/distributed-file-processor/internal/db/sqlc"
 	pb "github.com/janrusell-dev/distributed-file-processor/proto/metadata"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type MetadataService struct {
@@ -39,7 +41,11 @@ func (s *MetadataService) CreateMetadata(
 
 func (s *MetadataService) GetMetadata(ctx context.Context,
 	req *pb.GetMetadataRequest) (*pb.GetMetadataResponse, error) {
-	file, err := s.queries.GetFile(ctx, uuid.MustParse(req.Id))
+	parsedID, err := uuid.Parse(req.Id)
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid UUID format: %v", err)
+	}
+	file, err := s.queries.GetFile(ctx, parsedID)
 	if err != nil {
 		return nil, err
 	}

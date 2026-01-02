@@ -37,7 +37,7 @@ func (q *Queries) CreateFile(ctx context.Context, arg CreateFileParams) error {
 }
 
 const getFile = `-- name: GetFile :one
-SELECT id, filename, size, mime_type, status, created_at FROM files WHERE id = $1
+SELECT id, filename, size, mime_type, status, created_at, updated_at FROM files WHERE id = $1
 `
 
 func (q *Queries) GetFile(ctx context.Context, id uuid.UUID) (File, error) {
@@ -50,6 +50,7 @@ func (q *Queries) GetFile(ctx context.Context, id uuid.UUID) (File, error) {
 		&i.MimeType,
 		&i.Status,
 		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }

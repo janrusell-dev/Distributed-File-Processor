@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package upload;
+option go_package = "proto/upload";
+
+service UploadService {
+    rpc UploadFile(stream UploadFileRequest) returns (UploadFileResponse);
+}
+
+message UploadFileRequest {
+    oneof data {
+        Metadata metadata = 1;
+        bytes chunk = 2;
+    }
+}
+
+message Metadata {
+    string filename = 1;
+    string mime_type = 2;
+}
+
+message UploadFileResponse {
+    string id = 1;
+    int64 size = 2;
+}

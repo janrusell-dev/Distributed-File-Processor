@@ -17,4 +17,5 @@ type File struct {
 	MimeType  string
 	Status    string
 	CreatedAt time.Time
+	UpdatedAt time.Time
 }
