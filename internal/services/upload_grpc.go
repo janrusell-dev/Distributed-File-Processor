@@ -9,7 +9,7 @@ import (
 
 type UploadGRPCServer struct {
 	pb.UnimplementedUploadServiceServer
-	upload *UploadService
+	Upload *UploadService
 }
 
 func (s *UploadGRPCServer) UploadFile(stream pb.UploadService_UploadFileServer) error {
@@ -20,7 +20,7 @@ func (s *UploadGRPCServer) UploadFile(stream pb.UploadService_UploadFileServer) 
 	for {
 		req, err := stream.Recv()
 		if err == io.EOF {
-			id, err := s.upload.ProcessUpload(
+			id, err := s.Upload.ProcessUpload(
 				stream.Context(),
 				filename,
 				&buf,

@@ -13,4 +13,5 @@ WORKDIR /app
 COPY --from=builder /app/worker .
 EXPOSE 50051
 
+
 CMD ["./worker"]

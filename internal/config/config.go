@@ -8,8 +8,11 @@ import (
 )
 
 type Config struct {
-	DatabaseURL string
-	GRPCPort    string
+	DatabaseURL  string
+	GRPCPort     string
+	MetadataAddr string
+	RedisAddr    string
+	UploadDir    string
 }
 
 func Load() Config {
@@ -17,19 +20,18 @@ func Load() Config {
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found")
 	}
-
-	dbURL := os.Getenv("DATABASE_URL")
-	if dbURL == "" {
-		log.Fatal("DATABASE_URL is required")
-	}
-
-	port := os.Getenv("GRPC_PORT")
-	if port == "" {
-		port = "50051"
-	}
-
 	return Config{
-		DatabaseURL: dbURL,
-		GRPCPort:    port,
+		DatabaseURL:  os.Getenv("DATABASE_URL"),
+		GRPCPort:     getEnv("GRPC_PORT", "50051"),
+		MetadataAddr: getEnv("METADATA_SERVICE_ADDR", "localhost:50051"),
+		RedisAddr:    getEnv("REDIS_ADDR", "localhost:6379"),
+		UploadDir:    getEnv("UPLOAD_DIR", "./data/uploads"),
 	}
+}
+
+func getEnv(key, fallback string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+	return fallback
 }

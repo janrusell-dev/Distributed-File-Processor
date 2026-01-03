@@ -1,23 +1,29 @@
-package worker
+package main
 
 import (
+	"context"
 	"log"
-	"net"
 
+	"github.com/janrusell-dev/distributed-file-processor/internal/cache"
+	"github.com/janrusell-dev/distributed-file-processor/internal/config"
+	"github.com/janrusell-dev/distributed-file-processor/internal/services"
+	"github.com/janrusell-dev/distributed-file-processor/proto/metadata"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func main() {
-	lis, err := net.Listen("tcp", ":50051")
+	cfg := config.Load()
+
+	conn, err := grpc.NewClient(cfg.MetadataAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	server := grpc.NewServer()
+	redisClient := cache.NewRedisClient(cfg.RedisAddr)
+	metaClient := metadata.NewMetadataServiceClient(conn)
 
-	log.Println("Worker running on :50051")
+	worker := services.NewWorker(redisClient, metaClient)
 
-	if err := server.Serve(lis); err != nil {
-		log.Fatal(err)
-	}
+	worker.Start(context.Background())
 }
