@@ -36,9 +36,25 @@ func (w *Worker) Start(ctx context.Context) {
 }
 
 func (w *Worker) processFile(id string) {
+	_, err := w.metaClient.UpdateStatus(context.Background(), &metadata.UpdateStatusRequest{
+		Id:     id,
+		Status: "processing",
+	})
+	if err != nil {
+		log.Printf("Failed to update status to processing for %s: %v", id, err)
+	}
 	log.Printf("Processing file: %s", id)
 
 	time.Sleep(5 * time.Second)
+
+	_, err = w.metaClient.UpdateStatus(context.Background(), &metadata.UpdateStatusRequest{
+		Id:     id,
+		Status: "completed",
+	})
+
+	if err != nil {
+		log.Printf("Failed to update status to completed for %s: %v", id, err)
+	}
 
 	log.Printf("Finished processing: %s", id)
 }

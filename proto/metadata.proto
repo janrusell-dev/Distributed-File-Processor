@@ -6,6 +6,7 @@ option go_package = "proto/metadata";
 service MetadataService {
     rpc CreateMetadata(CreateMetadataRequest) returns (CreateMetadataResponse);
     rpc GetMetadata(GetMetadataRequest) returns (GetMetadataResponse);
+    rpc UpdateStatus(UpdateStatusRequest) returns (UpdateStatusResponse);
 }
 
 message CreateMetadataRequest {
@@ -28,4 +29,13 @@ message GetMetadataResponse {
     int64 size = 3;
     string mime_type = 4;
     string status = 5;
+ }
+
+ message UpdateStatusRequest {
+    string id = 1;
+    string status = 2;
+ }
+
+ message UpdateStatusResponse {
+    bool success = 1;
  }

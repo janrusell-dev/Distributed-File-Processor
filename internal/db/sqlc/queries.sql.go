@@ -54,3 +54,19 @@ func (q *Queries) GetFile(ctx context.Context, id uuid.UUID) (File, error) {
 	)
 	return i, err
 }
+
+const updateFileStatus = `-- name: UpdateFileStatus :exec
+UPDATE files
+SET status = $2
+WHERE id = $1
+`
+
+type UpdateFileStatusParams struct {
+	ID     uuid.UUID
+	Status string
+}
+
+func (q *Queries) UpdateFileStatus(ctx context.Context, arg UpdateFileStatusParams) error {
+	_, err := q.db.ExecContext(ctx, updateFileStatus, arg.ID, arg.Status)
+	return err
+}

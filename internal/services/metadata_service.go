@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"log"
 
 	"github.com/google/uuid"
 	db "github.com/janrusell-dev/distributed-file-processor/internal/db/sqlc"
@@ -24,6 +25,8 @@ func (s *MetadataService) CreateMetadata(
 ) (*pb.CreateMetadataResponse, error) {
 	id := uuid.New()
 
+	log.Printf("Received Metadata creation for file: %s (%d bytes)", req.Filename, req.Size)
+
 	err := s.queries.CreateFile(ctx, db.CreateFileParams{
 		ID:       id,
 		Filename: req.Filename,
@@ -32,8 +35,10 @@ func (s *MetadataService) CreateMetadata(
 		Status:   "uploaded",
 	})
 	if err != nil {
+		log.Printf("Error in creating Metadata: %v", err)
 		return nil, err
 	}
+
 	return &pb.CreateMetadataResponse{
 		Id: id.String(),
 	}, nil
@@ -56,4 +61,27 @@ func (s *MetadataService) GetMetadata(ctx context.Context,
 		MimeType: file.MimeType,
 		Status:   file.Status,
 	}, nil
+}
+
+func (s *MetadataService) UpdateStatus(
+	ctx context.Context, req *pb.UpdateStatusRequest,
+) (*pb.UpdateStatusResponse, error) {
+	parsedID, err := uuid.Parse(req.Id)
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid UUID: %v", err)
+	}
+
+	log.Printf("Updating file %s status to: %s", req.Id, req.Status)
+
+	err = s.queries.UpdateFileStatus(ctx, db.UpdateFileStatusParams{
+		ID:     parsedID,
+		Status: req.Status,
+	})
+
+	if err != nil {
+		log.Printf("Failed to update status for %s: %v", req.Id, err)
+		return &pb.UpdateStatusResponse{Success: false}, err
+	}
+	log.Printf("Status succesfully updated for %s", req.Id)
+	return &pb.UpdateStatusResponse{Success: true}, nil
 }

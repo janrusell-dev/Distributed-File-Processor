@@ -245,6 +245,102 @@ func (x *GetMetadataResponse) GetStatus() string {
 	return ""
 }
 
+type UpdateStatusRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateStatusRequest) Reset() {
+	*x = UpdateStatusRequest{}
+	mi := &file_proto_metadata_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateStatusRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateStatusRequest) ProtoMessage() {}
+
+func (x *UpdateStatusRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_metadata_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateStatusRequest.ProtoReflect.Descriptor instead.
+func (*UpdateStatusRequest) Descriptor() ([]byte, []int) {
+	return file_proto_metadata_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *UpdateStatusRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *UpdateStatusRequest) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+type UpdateStatusResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateStatusResponse) Reset() {
+	*x = UpdateStatusResponse{}
+	mi := &file_proto_metadata_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateStatusResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateStatusResponse) ProtoMessage() {}
+
+func (x *UpdateStatusResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_metadata_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateStatusResponse.ProtoReflect.Descriptor instead.
+func (*UpdateStatusResponse) Descriptor() ([]byte, []int) {
+	return file_proto_metadata_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *UpdateStatusResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
 var File_proto_metadata_proto protoreflect.FileDescriptor
 
 const file_proto_metadata_proto_rawDesc = "" +
@@ -263,10 +359,16 @@ const file_proto_metadata_proto_rawDesc = "" +
 	"\bfilename\x18\x02 \x01(\tR\bfilename\x12\x12\n" +
 	"\x04size\x18\x03 \x01(\x03R\x04size\x12\x1b\n" +
 	"\tmime_type\x18\x04 \x01(\tR\bmimeType\x12\x16\n" +
-	"\x06status\x18\x05 \x01(\tR\x06status2\xb2\x01\n" +
+	"\x06status\x18\x05 \x01(\tR\x06status\"=\n" +
+	"\x13UpdateStatusRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x16\n" +
+	"\x06status\x18\x02 \x01(\tR\x06status\"0\n" +
+	"\x14UpdateStatusResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess2\x81\x02\n" +
 	"\x0fMetadataService\x12S\n" +
 	"\x0eCreateMetadata\x12\x1f.metadata.CreateMetadataRequest\x1a .metadata.CreateMetadataResponse\x12J\n" +
-	"\vGetMetadata\x12\x1c.metadata.GetMetadataRequest\x1a\x1d.metadata.GetMetadataResponseB\x10Z\x0eproto/metadatab\x06proto3"
+	"\vGetMetadata\x12\x1c.metadata.GetMetadataRequest\x1a\x1d.metadata.GetMetadataResponse\x12M\n" +
+	"\fUpdateStatus\x12\x1d.metadata.UpdateStatusRequest\x1a\x1e.metadata.UpdateStatusResponseB\x10Z\x0eproto/metadatab\x06proto3"
 
 var (
 	file_proto_metadata_proto_rawDescOnce sync.Once
@@ -280,20 +382,24 @@ func file_proto_metadata_proto_rawDescGZIP() []byte {
 	return file_proto_metadata_proto_rawDescData
 }
 
-var file_proto_metadata_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_proto_metadata_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_proto_metadata_proto_goTypes = []any{
 	(*CreateMetadataRequest)(nil),  // 0: metadata.CreateMetadataRequest
 	(*CreateMetadataResponse)(nil), // 1: metadata.CreateMetadataResponse
 	(*GetMetadataRequest)(nil),     // 2: metadata.GetMetadataRequest
 	(*GetMetadataResponse)(nil),    // 3: metadata.GetMetadataResponse
+	(*UpdateStatusRequest)(nil),    // 4: metadata.UpdateStatusRequest
+	(*UpdateStatusResponse)(nil),   // 5: metadata.UpdateStatusResponse
 }
 var file_proto_metadata_proto_depIdxs = []int32{
 	0, // 0: metadata.MetadataService.CreateMetadata:input_type -> metadata.CreateMetadataRequest
 	2, // 1: metadata.MetadataService.GetMetadata:input_type -> metadata.GetMetadataRequest
-	1, // 2: metadata.MetadataService.CreateMetadata:output_type -> metadata.CreateMetadataResponse
-	3, // 3: metadata.MetadataService.GetMetadata:output_type -> metadata.GetMetadataResponse
-	2, // [2:4] is the sub-list for method output_type
-	0, // [0:2] is the sub-list for method input_type
+	4, // 2: metadata.MetadataService.UpdateStatus:input_type -> metadata.UpdateStatusRequest
+	1, // 3: metadata.MetadataService.CreateMetadata:output_type -> metadata.CreateMetadataResponse
+	3, // 4: metadata.MetadataService.GetMetadata:output_type -> metadata.GetMetadataResponse
+	5, // 5: metadata.MetadataService.UpdateStatus:output_type -> metadata.UpdateStatusResponse
+	3, // [3:6] is the sub-list for method output_type
+	0, // [0:3] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -310,7 +416,7 @@ func file_proto_metadata_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_metadata_proto_rawDesc), len(file_proto_metadata_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
