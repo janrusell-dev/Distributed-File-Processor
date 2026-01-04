@@ -19,3 +19,10 @@ type File struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
+
+type Result struct {
+	ID         uuid.UUID
+	FileID     uuid.UUID
+	OutputData string
+	CreatedAt  time.Time
+}

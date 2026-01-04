@@ -1,3 +1,6 @@
+include .env
+export
+
 migrate-up:
 	goose -dir internal/db/migrations postgres $(DB_URL) up
 

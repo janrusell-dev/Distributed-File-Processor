@@ -53,8 +53,27 @@ services:
     environment:
       - METADATA_SERVICE_ADDR=metadata:50051
       - REDIS_ADDR=redis:6379
+      - RESULT_SERVICE=result:50053
     volumes:
       - ./data/uploads:/app/uploads
     depends_on:
-      - redis
       - metadata
+      - redis
+      - result
+
+  result:
+    build:
+      context: .
+      dockerfile: cmd/result/Dockerfile
+    ports:
+      - "50053:50053"
+    environment:
+      - GRPC_PORT=50053
+      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}?sslmode=disable
+      - REDIS_ADDR=redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+

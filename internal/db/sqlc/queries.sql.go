@@ -36,6 +36,29 @@ func (q *Queries) CreateFile(ctx context.Context, arg CreateFileParams) error {
 	return err
 }
 
+const createResult = `-- name: CreateResult :one
+INSERT INTO results (file_id, output_data)
+VALUES ($1, $2)
+RETURNING id, file_id, output_data, created_at
+`
+
+type CreateResultParams struct {
+	FileID     uuid.UUID
+	OutputData string
+}
+
+func (q *Queries) CreateResult(ctx context.Context, arg CreateResultParams) (Result, error) {
+	row := q.db.QueryRowContext(ctx, createResult, arg.FileID, arg.OutputData)
+	var i Result
+	err := row.Scan(
+		&i.ID,
+		&i.FileID,
+		&i.OutputData,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const getFile = `-- name: GetFile :one
 SELECT id, filename, size, mime_type, status, created_at, updated_at FROM files WHERE id = $1
 `
@@ -51,6 +74,22 @@ func (q *Queries) GetFile(ctx context.Context, id uuid.UUID) (File, error) {
 		&i.Status,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getResultByFileID = `-- name: GetResultByFileID :one
+SELECT id, file_id, output_data, created_at FROM results WHERE file_id = $1
+`
+
+func (q *Queries) GetResultByFileID(ctx context.Context, fileID uuid.UUID) (Result, error) {
+	row := q.db.QueryRowContext(ctx, getResultByFileID, fileID)
+	var i Result
+	err := row.Scan(
+		&i.ID,
+		&i.FileID,
+		&i.OutputData,
+		&i.CreatedAt,
 	)
 	return i, err
 }

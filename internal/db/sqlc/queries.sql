@@ -10,3 +10,11 @@ SELECT * FROM files WHERE id = $1;
 UPDATE files
 SET status = $2
 WHERE id = $1;
+
+-- name: CreateResult :one
+INSERT INTO results (file_id, output_data)
+VALUES ($1, $2)
+RETURNING *;
+
+-- name: GetResultByFileID :one
+SELECT * FROM results WHERE file_id = $1;
