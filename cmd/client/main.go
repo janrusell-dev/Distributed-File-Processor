@@ -9,19 +9,23 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/janrusell-dev/distributed-file-processor/internal/config"
 	pb "github.com/janrusell-dev/distributed-file-processor/proto/upload"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 func main() {
+
+	cfg := config.Load()
+
 	if len(os.Args) < 2 {
 		log.Fatal("Usage: go run cmd/client/main.go testdata/sample.txt")
 	}
 
 	filepath := os.Args[1]
 
-	conn, err := grpc.NewClient("localhost:50052", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(cfg.ClientAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}

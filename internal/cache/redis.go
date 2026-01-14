@@ -2,6 +2,7 @@ package cache
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -41,5 +42,12 @@ func (r *RedisClient) SetResult(ctx context.Context, fileID string, data string)
 }
 
 func (r *RedisClient) GetResult(ctx context.Context, fileID string) (string, error) {
-	return r.rdb.Get(ctx, "result:"+fileID).Result()
+	if r == nil || r.rdb == nil {
+		return "", fmt.Errorf("redis not initialized")
+	}
+	val, err := r.rdb.Get(ctx, "result:"+fileID).Result()
+	if err == redis.Nil {
+		return "", nil
+	}
+	return val, err
 }

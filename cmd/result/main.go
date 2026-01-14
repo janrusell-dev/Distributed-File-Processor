@@ -13,6 +13,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
+	"google.golang.org/grpc/reflection"
 )
 
 func main() {
@@ -35,7 +36,7 @@ func main() {
 
 	healthServer := health.NewServer()
 	healthServer.SetServingStatus(
-		"metadata.MetadataService",
+		"result.ResultService",
 		grpc_health_v1.HealthCheckResponse_SERVING,
 	)
 
@@ -45,10 +46,12 @@ func main() {
 
 	result.RegisterResultServiceServer(server, resultService)
 
+	reflection.Register(server)
+
 	log.Printf("Result gRPC Server starting on port %s..", cfg.GRPCPort)
 
 	if err := server.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve gRPC: %v", err)
-	}
 
+	}
 }

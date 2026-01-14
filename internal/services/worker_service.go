@@ -8,6 +8,7 @@ import (
 	"github.com/janrusell-dev/distributed-file-processor/internal/cache"
 	"github.com/janrusell-dev/distributed-file-processor/proto/metadata"
 	"github.com/janrusell-dev/distributed-file-processor/proto/result"
+	pb "github.com/janrusell-dev/distributed-file-processor/proto/result"
 )
 
 type Worker struct {
@@ -53,8 +54,14 @@ func (w *Worker) processFile(ctx context.Context, id string) {
 		Id:     id,
 		Status: "processing",
 	})
+	processedData := "SUCCESS: Data for file " + id + " has been processed."
+
+	_, err = w.resultClient.StoreResult(ctx, &pb.StoreResultRequest{
+		FileId:     id,
+		ResultData: processedData,
+	})
 	if err != nil {
-		log.Printf("Failed to update status to processing for %s: %v", id, err)
+		log.Printf("StoreResult failed %s: %v", id, err)
 	}
 	log.Printf("Processing file: %s", id)
 

@@ -21,9 +21,14 @@ func main() {
 		log.Fatal(err)
 	}
 
+	resultConn, err := grpc.NewClient(cfg.ResultAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatalf("Result conn fail: %v", err)
+	}
+
 	redisClient := cache.NewRedisClient(cfg.RedisAddr)
 	metaClient := metadata.NewMetadataServiceClient(conn)
-	resultClient := result.NewResultServiceClient(conn)
+	resultClient := result.NewResultServiceClient(resultConn)
 
 	worker := services.NewWorker(redisClient, metaClient, resultClient)
 

@@ -20,11 +20,16 @@ type ResultService struct {
 }
 
 func NewResultService(q *db.Queries, r *cache.RedisClient) *ResultService {
-	return &ResultService{queries: q}
+	return &ResultService{queries: q, redis: r}
 }
 
 func (s *ResultService) StoreResult(ctx context.Context,
 	req *pb.StoreResultRequest) (*pb.StoreResultResponse, error) {
+
+	if req.GetFileId() == "" {
+		return nil, status.Errorf(codes.InvalidArgument, "file_id is required")
+	}
+
 	fileId, err := uuid.Parse(req.FileId)
 	if err != nil {
 		return nil, err
