@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package result;
+
+option go_package = "proto/result";
+
+service ResultService {
+    rpc StoreResult(StoreResultRequest) returns (StoreResultResponse);
+    rpc GetResult(GetResultRequest) returns (GetResultResponse);
+}
+
+message StoreResultRequest {
+    string file_id = 1;
+    string result_data = 2;
+}
+
+message StoreResultResponse {
+    bool success = 1;
+}
+
+message GetResultRequest {
+    string file_id = 1;
+}
+
+message GetResultResponse {
+    string file_id = 1;
+    string result_data = 2;
+    string status = 3;
+}
+

@@ -7,47 +7,65 @@ import (
 
 	"github.com/janrusell-dev/distributed-file-processor/internal/cache"
 	"github.com/janrusell-dev/distributed-file-processor/proto/metadata"
+	"github.com/janrusell-dev/distributed-file-processor/proto/result"
+	pb "github.com/janrusell-dev/distributed-file-processor/proto/result"
 )
 
 type Worker struct {
-	redis      *cache.RedisClient
-	metaClient metadata.MetadataServiceClient
+	redis        *cache.RedisClient
+	metaClient   metadata.MetadataServiceClient
+	resultClient result.ResultServiceClient
 }
 
-func NewWorker(r *cache.RedisClient, mc metadata.MetadataServiceClient) *Worker {
-	return &Worker{redis: r, metaClient: mc}
+func NewWorker(r *cache.RedisClient, mc metadata.MetadataServiceClient,
+	rc result.ResultServiceClient) *Worker {
+	return &Worker{redis: r, metaClient: mc, resultClient: rc}
 }
 
 func (w *Worker) Start(ctx context.Context) {
+
+	sem := make(chan struct{}, 5)
+
 	log.Println("Worker started. Watching Redis for tasks...")
 
 	for {
 		fileID, err := w.redis.PopTask(ctx)
 		if err != nil {
 			log.Printf("Error pulling task: %v", err)
-			time.Sleep(2 * time.Second)
+			time.Sleep(time.Second)
 			continue
 		}
 
 		if fileID != "" {
-			w.processFile(fileID)
+			sem <- struct{}{}
+			go func(id string) {
+				defer func() {
+					<-sem
+				}()
+				w.processFile(ctx, id)
+			}(fileID)
+
 		}
 	}
 }
 
-func (w *Worker) processFile(id string) {
-	_, err := w.metaClient.UpdateStatus(context.Background(), &metadata.UpdateStatusRequest{
+func (w *Worker) processFile(ctx context.Context, id string) {
+	_, err := w.metaClient.UpdateStatus(ctx, &metadata.UpdateStatusRequest{
 		Id:     id,
 		Status: "processing",
 	})
+	processedData := "SUCCESS: Data for file " + id + " has been processed."
+
+	_, err = w.resultClient.StoreResult(ctx, &pb.StoreResultRequest{
+		FileId:     id,
+		ResultData: processedData,
+	})
 	if err != nil {
-		log.Printf("Failed to update status to processing for %s: %v", id, err)
+		log.Printf("StoreResult failed %s: %v", id, err)
 	}
 	log.Printf("Processing file: %s", id)
 
-	time.Sleep(5 * time.Second)
-
-	_, err = w.metaClient.UpdateStatus(context.Background(), &metadata.UpdateStatusRequest{
+	_, err = w.metaClient.UpdateStatus(ctx, &metadata.UpdateStatusRequest{
 		Id:     id,
 		Status: "completed",
 	})

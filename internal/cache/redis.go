@@ -2,6 +2,8 @@ package cache
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -33,4 +35,19 @@ func (r *RedisClient) PopTask(ctx context.Context) (string, error) {
 	}
 
 	return "", nil
+}
+
+func (r *RedisClient) SetResult(ctx context.Context, fileID string, data string) error {
+	return r.rdb.Set(ctx, "result:"+fileID, data, 24*time.Hour).Err()
+}
+
+func (r *RedisClient) GetResult(ctx context.Context, fileID string) (string, error) {
+	if r == nil || r.rdb == nil {
+		return "", fmt.Errorf("redis not initialized")
+	}
+	val, err := r.rdb.Get(ctx, "result:"+fileID).Result()
+	if err == redis.Nil {
+		return "", nil
+	}
+	return val, err
 }

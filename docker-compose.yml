@@ -13,11 +13,15 @@ services:
       timeout: 5s
       retries: 5
       start_period: 5s
+    networks:
+      - app-network
 
   redis:
     image: redis:7
     ports:
       - "${REDIS_PORT}:6379"
+    networks:
+      - app-network
 
   metadata:
     build:
@@ -29,6 +33,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    networks:
+      - app-network
   upload:
     build:
       context: .
@@ -46,6 +52,8 @@ services:
       - postgres
       - redis
       - metadata
+    networks:
+      - app-network
   worker:
     build:
       context: .
@@ -53,8 +61,46 @@ services:
     environment:
       - METADATA_SERVICE_ADDR=metadata:50051
       - REDIS_ADDR=redis:6379
+      - RESULT_SERVICE_ADDR=result:50053
     volumes:
       - ./data/uploads:/app/uploads
     depends_on:
-      - redis
       - metadata
+      - redis
+      - result
+    networks:
+      - app-network
+
+  result:
+    build:
+      context: .
+      dockerfile: cmd/result/Dockerfile
+    ports:
+      - "50053:50053"
+    environment:
+      - GRPC_PORT=50053
+      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}?sslmode=disable
+      - REDIS_ADDR=redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - app-network
+
+  grpc-ui:
+    image: fullstorydev/grpcui
+    container_name: grpc-ui
+    environment:
+      - GRPC_PORT=result:50053
+    ports:
+      - "8080:8080"
+    command: -plaintext -bind 0.0.0.0 result:50053
+    depends_on:
+      - result
+    networks:
+      - app-network
+networks:
+    app-network:
+      driver: bridge
