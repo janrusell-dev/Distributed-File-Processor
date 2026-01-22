@@ -30,7 +30,7 @@ func main() {
 	metaClient := metadata.NewMetadataServiceClient(conn)
 	resultClient := result.NewResultServiceClient(resultConn)
 
-	worker := services.NewWorker(redisClient, metaClient, resultClient)
+	worker := services.NewWorker(redisClient, metaClient, resultClient, cfg.UploadDir)
 
 	worker.Start(context.Background())
 }

@@ -1,0 +1,143 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: metadata
+spec:
+  selector:
+    app: metadata
+  ports:
+  - port: 50051
+    targetPort: 50051
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metadata
+spec:
+  selector:
+    matchLabels:
+      app: metadata
+  template:
+    metadata:
+      labels:
+        app: metadata
+    spec:
+      containers:
+      - name: metadata
+        image: janrusell/metadata-service:v1
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 50051
+        env:
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secrets
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:       
+              name: postgres-secrets
+              key: password
+        - name: DATABASE_URL
+          value: "postgres://$(DB_USER):$(DB_PASSWORD)@postgres:5432/metadata_db?sslmode=disable"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: worker
+  template:
+    metadata:
+      labels:
+        app: worker
+    spec:
+      containers:
+      - name: worker
+        image: janrusell/file-worker:v1
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        volumeMounts:
+        - name: storage
+          mountPath: /app/uploads
+        env:
+        - name: REDIS_ADDR
+          valueFrom: { configMapKeyRef: { name: shared-services-config, key: REDIS_ADDR}}
+        - name: METADATA_SERVICE_ADDR
+          valueFrom: { configMapKeyRef: { name: shared-services-config, key: METADATA_SERVICE_ADDR}}
+        - name: UPLOAD_DIR
+          value: "/app/uploads"
+        - name: RESULT_SERVICE_ADDR
+          valueFrom: { configMapKeyRef: { name: shared-services-config, key: RESULT_SERVICE_ADDR}}
+      volumes: 
+        - name: storage
+          persistentVolumeClaim: { claimName: upload-pvc}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: result
+spec:
+  selector:
+    app: result
+  ports:
+  - port: 50051
+    targetPort: 50051
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: result
+spec:
+  selector:
+    matchLabels:
+      app: result
+  template:
+    metadata:
+      labels:
+        app: result
+    spec:
+      containers:
+      - name: result
+        image: janrusell/result-service:v1
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 50051
+        env:
+        - name: GRPC_PORT
+          value: "50051"
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secrets
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secrets
+              key: password
+        - name: DATABASE_URL
+          value: "postgres://$(DB_USER):$(DB_PASSWORD)@postgres:5432/metadata_db?sslmode=disable"
+
+
