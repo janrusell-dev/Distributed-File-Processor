@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shared-services-config
+data:
+  REDIS_ADDR: "redis:6379"
+  METADATA_SERVICE_ADDR: "metadata:50051"
+  RESULT_SERVICE_ADDR: "result:50053"
+  UPLOAD_DIR: "/app/uploads"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: upload-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

@@ -27,6 +27,7 @@ services:
     build:
       context: .
       dockerfile: cmd/metadata/Dockerfile
+    image: janrusell/metadata-service:v1
     environment:
       - GRPC_PORT=50051
       - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}?sslmode=disable
@@ -39,11 +40,12 @@ services:
     build:
       context: .
       dockerfile: cmd/upload/Dockerfile
+    image: janrusell/upload-service:v1
     ports:
       - "50052:50052"
     environment:
       - GRPC_PORT=50052
-      - METADATA_SERVICE_ADDR=metadata:50051
+      - METADATA_SERVICE_ADDR=${METADATA_SERVICE_ADDR}
       - REDIS_ADDR=redis:6379
       - UPLOAD_DIR=/app/uploads
     volumes:
@@ -58,10 +60,12 @@ services:
     build:
       context: .
       dockerfile: cmd/worker/Dockerfile
+    image: janrusell/file-worker:v1
     environment:
-      - METADATA_SERVICE_ADDR=metadata:50051
+      - METADATA_SERVICE_ADDR=${METADATA_SERVICE_ADDR}
       - REDIS_ADDR=redis:6379
-      - RESULT_SERVICE_ADDR=result:50053
+      - RESULT_SERVICE_ADDR=${RESULT_SERVICE_ADDR}
+      - UPLOAD_DIR=/app/uploads
     volumes:
       - ./data/uploads:/app/uploads
     depends_on:
@@ -75,6 +79,7 @@ services:
     build:
       context: .
       dockerfile: cmd/result/Dockerfile
+    image: janrusell/result-service:v1
     ports:
       - "50053:50053"
     environment:
@@ -93,7 +98,7 @@ services:
     image: fullstorydev/grpcui
     container_name: grpc-ui
     environment:
-      - GRPC_PORT=result:50053
+      - GRPC_PORT=${RESULT_SERVICE_ADDR}
     ports:
       - "8080:8080"
     command: -plaintext -bind 0.0.0.0 result:50053
